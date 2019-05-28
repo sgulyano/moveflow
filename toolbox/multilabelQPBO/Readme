@@ -1,0 +1,43 @@
+# Matlab Wrapper for Fusion Moves (QPBO + alpha-expansion)
+by Sarun Gulyanon 24.04.2017
+
+---------------------
+Description
+---------------------
+Fusion Moves is a method based on QPBO and alpha-expansion to optimize the multilabel graphical model like MRF and CRF. The energy function of graphical model can be non-submodular unlike graph cuts. QPBO is originally designed for binary graphical model, then alpha-expansion extends it to multi-label problem. I implemented only the alpha-expansion wrapper built on top of qpboMex (mex files of binary QPBO). This is implemented for educational purposes.
+
+---------------------
+Instruction
+---------------------
+* First download qpboMex (https://github.com/aosokin/qpboMex) and extract it (make sure it is included using addpath function). However you need MIT license to use this repository.
+* To run, see example_fusion_moves.m for example.
+* For more details of the function, type >> help fusion_moves
+
+---------------------
+Related Repository
+---------------------
+We used the Matlab Wrapper for binary MRF from
+* https://github.com/aosokin/qpboMex
+
+We implement the alpha-expansion in Matlab following:
+* https://github.com/rstebbing/qpbo-alpha-expand
+
+QPBO code from
+* http://pub.ist.ac.at/~vnk/software.html
+
+---------------------
+Reference
+---------------------
+Please cite the following paper in any resulting publication for fusion moves:
+
+Lempitsky, Victor, et al. "Fusion moves for markov random field optimization." IEEE transactions on pattern analysis and machine intelligence 32.8 (2010): 1392-1405.
+
+Please cite the following paper in any resulting publication for QPBO:
+
+Vladimir Kolmogorov and Cartsen Rother.
+Minimizing non-submodular functions with graph cuts - a review.
+In IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI), 29(7):1274-1279, July 2007
+
+Please cite the following paper in any resulting publication for alpha-expansion:
+
+Yuri Boykov, Olga Veksler, and Ramin Zabih. 2001. Fast Approximate Energy Minimization via Graph Cuts. IEEE Trans. Pattern Anal. Mach. Intell. 23, 11 (November 2001), 1222-1239. DOI=http://dx.doi.org/10.1109/34.969114

@@ -1,0 +1,1 @@
+g++-6.1.0 -m64 -O3 -fopenmp -msse4 -shared -w -I"/Applications/MATLAB_R2016a.app/extern/include" -I"/Applications/MATLAB_R2016a.app/simulink/include" -DMATLAB_MEX_FILE -o ../../trws_l1.mexmaci64 *.cpp  -L"/Applications/MATLAB_R2016a.app/bin/maci64" -lmex -lmx -leng -lmat -fPIC

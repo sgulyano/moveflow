@@ -11,7 +11,7 @@ if nargin < 5
 end
 states = -pi/2+pi/8:pi/8:pi/2-pi/8;%[0:pi/8:pi/2-pi/8 -(pi/8:pi/8:pi/2-pi/8)];%0:pi/8:pi/2-pi/8;
 
-%%
+%% Init plane
 % convert swc to image
 sizeI = [size(V,1), size(V,2)];
 % create baseline mask
@@ -34,7 +34,7 @@ xx = xrange(1):xrange(2);
 ddad_somaidx = find(xx == ddad_somaX);
 ddae_somaidx = find(xx == ddae_somaX);
 I_bs = im2double(V(yrange(1):yrange(2),xrange(1):xrange(2),track_time+1));
-
+% keyboard;
 % init FFD
 ctrlpnt_dist = ceil(abs(xrange-somaX)/dx)+[1 2];
 config = {zeros(1,ctrlpnt_dist(1)), zeros(1,ctrlpnt_dist(2))};
@@ -52,19 +52,24 @@ spline.u_index_array = mod(xx-Ox_bs(1),dx)*4;   % times 4, it is column in Bu
 spline.i_array = floor((xx-Ox_bs(1))/dx); 
 
 %% draw figure
-f = figure('Visible','off','Position',[160,200,1050,785],'Tag','MainGUI');
+f = figure('Visible','off','Position',[100, 10, 1130, 580],'Tag','MainGUI',...
+        'NumberTitle','off', 'Name','Fitting Plane to A Neuron Pair');
 set(f, 'KeyPressFcn', @guiKeyPress);
 
 %  Construct the components.
-uicontrol(f, 'Style','pushbutton','String','Next',...
-        'Units','normalized','Position',[0.87,0.4,0.1,0.05],...
+uicontrol(f, 'Style','pushbutton','String','NEXT','FontSize',14,...
+        'Units','normalized','Position',[0.2,0.02,0.1,0.05],...
         'Callback',@nextbutton_Callback);
-uicontrol(f, 'Style','pushbutton','String','Done',...
-        'Units','normalized','Position',[0.87,0.55,0.1,0.05],...
+uicontrol(f, 'Style','pushbutton','String','DONE','FontSize',14,...
+        'Units','normalized','Position',[0.85,0.02,0.1,0.05],...
         'Callback',@donebutton_Callback);
-ha = axes(f, 'Units','normalized','Position',[0.05,0.1,0.8,0.8]); 
-
-himg = imshow(V(:,:,track_time+1)); title(['Time : ' num2str(track_time)]);
+uicontrol(f, 'Style','text','FontSize',14,...
+        'Units','normalized','Position',[0.33,0.01,0.5,0.06],...
+        'String',['Drag GREEN/RED points to the tips of LEFT/RIGHT dendrites '...
+        'to fit the neuron. Press NEXT button (or Space) to go to the next frame.']);
+ha = axes(f, 'Units','normalized','Position',[0.05,0.1,0.93,0.88]);
+% draw image
+himg = imshow(V(:,:,track_time+1)); title(['Time : ' num2str(track_time) '/' num2str(size(V,3)-1)]);
 hold on;
 % draw dendrite mask
 green = cat(3, zeros(sizeI), ones(sizeI), zeros(sizeI));
@@ -75,6 +80,8 @@ px = [Ox_bs(:) Ox_bs(:)]';
 py = (ones(length(Ox_bs),1)*yrange)' + ones(2,1)*Oz_bs;
 hctrl = plot(px, py);
 set(hctrl, {'color'}, num2cell(parula(length(Ox_bs)), 2));
+pyt = [py(1,:)'; fliplr(py(2,:))']; pxt = [px(1,:)'; fliplr(px(2,:))'];
+hctrl_plane = plot(pxt([1:end 1]), pyt([1:end 1]), 'b--');
 hold off;
 % draw point for interactive FFD fitting
 N = xrange(2)-xrange(1)+1;
@@ -101,7 +108,7 @@ for t = track_time+2:size(V,3)
     ds = mean(cellfun(@(x)(x(t,1) - x(t-1,1)), soma_pos));
     leftpos(t,:) = leftpos(t-1,:) + [ds 0];
     rightpos(t,:) = rightpos(t-1,:) + [ds 0];
-    set(himg, 'CData', V(:,:,t)); title(['Time : ' num2str(t-1)]);
+    set(himg, 'CData', V(:,:,t)); title(['Time : ' num2str(t-1) '/' num2str(size(V,3)-1)]);
     
     hpntL.setPosition(leftpos(t,1),leftpos(t,2))
     hpntR.setPosition(rightpos(t,1),rightpos(t,2))
@@ -234,6 +241,9 @@ delete(gcf);
         py1 = (ones(length(Ox),1)*newyrange)' + ones(2,1)*Oz;
         set(hctrl, {'XData'}, num2cell(px1, 1)')
         set(hctrl, {'YData'}, num2cell(py1, 1)')
+        pyt1 = [py1(1,:)'; fliplr(py1(2,:))']; pxt1 = [px1(1,:)'; fliplr(px1(2,:))'];
+        set(hctrl_plane, 'XData', pxt1([1:end 1]), 'YData', pyt1([1:end 1]));
+        
         % update dendrite mask
         Tx = ffd_interpolate(Ox, spline);
         [cx, cy] = meshgrid(round(Tx), newyrange(1):newyrange(2));

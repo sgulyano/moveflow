@@ -688,8 +688,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
     double *ThreadID1;
     
 	/* Dims outputs */
-	const int dims_error[2]={1,1};
-	int dims_error_gradient[3]={1,1,2};
+	const mwSize dims_error[2]={1,1};
+	mwSize dims_error_gradient[3]={1,1,2};
 	
 	/* Size of input image */
     double Isize_d[3]={0,0,0};

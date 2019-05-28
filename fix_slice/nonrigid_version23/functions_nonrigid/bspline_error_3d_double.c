@@ -414,8 +414,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	/* index offsets */
 	int offset1, offset2, offset3;
 	/* Dims outputs */
-	const int dims_error[2]={1,1};
-	int dims_error_gradient[4]={1,1,1,3};
+	const mwSize dims_error[2]={1,1};
+	mwSize dims_error_gradient[4]={1,1,1,3};
 	/* double pointer array to store all needed function variables) */
     double ***ThreadArgs;
     double **ThreadArgs1;

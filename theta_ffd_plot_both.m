@@ -42,9 +42,7 @@ dds = Dlarge - ds;
 theta_cycle = dds * d2theta;
 theta_cycle(small_pos:end) = 2*pi - theta_cycle(small_pos:end);
 theta(track_time+1) = theta_cycle(1);
-
-somadist(track_time+1) = interp1(opt.tval, opt.tmean, theta(track_time+1));
-% somadist(track_time+1) = ds(1)*opt.pixelsize;
+somadist(track_time+1) = ds(1)*opt.pixelsize;
 
 bend(track_time+1,:) = cellfun(@(x)sum(abs(x)),configs(track_time+1,:));
 
@@ -180,13 +178,13 @@ camlight
 lighting gouraud
 % plot soma distance
 axes(ha3);
-htheta = plot(time, somadist, 'LineWidth', 3, 'Color', col2);
+htheta = plot(time, somadist, 'LineWidth', 3);
 set(gca, 'FontSize', 16);
-axis([([st en]-1)*opt.tpf 0 1]);
+axis([([st en]-1)*opt.tpf 0 Dlarge*opt.pixelsize]);
 hold on;
 hdiv1 = plot([st-1 st-1]*opt.tpf, [0 Dlarge*opt.pixelsize], 'k', 'LineWidth', 2);
 hold off;
-ylabel('Normalized Neuronal Activity', 'FontSize', 16);
+ylabel('Soma Distance (\mum)', 'FontSize', 16);
 xlabel('Time (s)', 'FontSize', 16);
 
 % plot bend parameters
@@ -199,7 +197,7 @@ radmax = max(max(cellfun(@(x)sum(abs(x)), configs)));
 axis([([st en]-1)*opt.tpf 0 radmax]);
 hdiv2 = plot([st-1 st-1]*opt.tpf, [0 radmax], 'k', 'LineWidth', 2);
 hold off;
-ylabel('Morphology Deformation (rad)', 'FontSize', 16);
+ylabel('Bending (rad)', 'FontSize', 16);
 xlabel('Time (s)', 'FontSize', 16);
 legend({'ddaD', 'ddaE'}, 'Location', 'northwest');
 
@@ -303,12 +301,8 @@ for t = track_time+2:size(V,3)
     hmodel2.Faces = sf2.faces;
 
     % update theta
-%     somadist(t) = ds(t - track_time)*opt.pixelsize;
+    somadist(t) = ds(t - track_time)*opt.pixelsize;
     theta(t) = theta_cycle(t - track_time);
-    
-    somadist(t) = interp1(opt.tval, opt.tmean, theta(t));
-%     keyboard;
-    
     set(hradian_tlt, 'String', sprintf('Angle = %6.2f \\circ', theta(t)*180/pi));
     [xx, yy] = pol2cart(theta(t), 1);
     set(hradian, 'XData', xx);
@@ -346,133 +340,6 @@ end
 if ~isempty(filename)
     close(outputVideo);
 end
-pause;
-% keyboard;
-
-
-%%
-% save to video
-% if ~isempty(filename)
-outputVideo = VideoWriter(filename, 'MPEG-4');
-open(outputVideo);
-% end
-
-%% create animation
-tval_ct = 1;
-for t = track_time+1:size(V,3)
-    if isempty(configs{t,1})
-        break;
-    end
-    ddadX = soma_pos{1}(t,1);
-    ddadY = soma_pos{1}(t,2);
-    ddaeX = soma_pos{2}(t,1);
-    ddaeY = soma_pos{2}(t,2);
-    newsomaX = (ddadX + ddaeX)/2;
-    newsomaY = (ddadY + ddaeY)/2;
-    dsomaY = round(somaY - (ddadY+ddaeY)/2);
-    if isempty(opt.zflip)
-        [Ox,Oz] = ffd_init_from_config(configs(t,:), newsomaX, dx);
-    else
-        [Ox,Oz] = ffd_init_from_config(configs(t,:), newsomaX, dx, opt.zflip{t});
-    end
-    % transform dendrite in 2D
-    Tx = ffd_interpolate(Ox, spline);
-    newyrange = yrange - dsomaY;
-    [cx, cy] = meshgrid(round(Tx), newyrange(1):newyrange(2));
-    cx = cx(:); cy = cy(:);
-    idxIn = cy >= 1 & cy <= sizeI(1) & cx >= 1 & cx <= sizeI(2);
-    
-    I_mask_t = zeros(sizeI);
-    I_mask_t(sub2ind(sizeI, cy(I2D_mask1_crop(:)&idxIn), cx(I2D_mask1_crop(:)&idxIn))) = 1;
-    set(hmask1, 'AlphaData', I_mask_t*.2);
-    I_mask_t = zeros(sizeI);
-    I_mask_t(sub2ind(sizeI, cy(I2D_mask2_crop(:)&idxIn), cx(I2D_mask2_crop(:)&idxIn))) = 1;
-    set(hmask2, 'AlphaData', I_mask_t*.2);
-    
-    % update image and dendrite highlight
-    set(himg, 'CData', repmat(V(:,:,t),1,1,3));
-    set(himg_tlt, 'String', sprintf('Time %.3f s, Frame %d', time(t), t-1));
-    set(hddad_pos, 'XData', soma_pos{1}(t,1)+sin(ang)*soma_pos{1}(t,3));
-    set(hddad_pos, 'YData', soma_pos{1}(t,2)+cos(ang)*soma_pos{1}(t,3));
-    set(hddae_pos, 'XData', soma_pos{2}(t,1)+sin(ang)*soma_pos{2}(t,3));
-    set(hddae_pos, 'YData', soma_pos{2}(t,2)+cos(ang)*soma_pos{2}(t,3));
-    set(hsoma_adj, 'XData', soma_adj(t,1)+sin(ang)*soma_adj(t,3));
-    set(hsoma_adj, 'YData', soma_adj(t,2)+cos(ang)*soma_adj(t,3));
-    
-    % transform dendrite in Z-axis
-    Tz = ffd_interpolate(Oz, spline)+1;
-    [cz, ~] = meshgrid(round(Tz) - min(round(Tz))+1, newyrange(1):newyrange(2));
-    ddadZ = cz(ddad_somaY - yrange(1) + 1, ddad_somaX - xrange(1) + 1);
-    ddaeZ = cz(ddae_somaY - yrange(1) + 1, ddae_somaX - xrange(1) + 1);
-    cz = cz(:);
-    sizeI3D = [sizeI 1+range(cz)];
-
-    % update 3D dendrite ddaD
-    I3D = zeros(sizeI3D);
-    I3D(sub2ind(sizeI3D, cy(I_mask1_crop(:)&idxIn), cx(I_mask1_crop(:)&idxIn), cz(I_mask1_crop(:)&idxIn))) = 1;
-    I3D = padarray(I3D, [2 2 7], 0, 'both');
-    I3D = imdilate(I3D, ones(3,3,3));
-    [xx3, yy3, zz3] = meshgrid(1:size(I3D,2), 1:size(I3D,1), 1:size(I3D,3));
-    I3D((xx3 - ddadX - 2).^2 + (yy3 - ddadY - 2).^2 + (zz3 - ddadZ - 7).^2 < swcs{1}(1,6)^2) = 1;
-    sf1 = isosurface(I3D, .5);
-    % relocate soma to (0,0,1)
-    hmodel1.Vertices = bsxfun(@minus, sf1.vertices, [newsomaX, newsomaY, 0]) * opt.pixelsize;
-    hmodel1.Faces = sf1.faces;
-    % update 3D dendrite ddaE
-    I3D = zeros(sizeI3D);
-    I3D(sub2ind(sizeI3D, cy(I_mask2_crop(:)&idxIn), cx(I_mask2_crop(:)&idxIn), cz(I_mask2_crop(:)&idxIn))) = 1;
-    I3D = padarray(I3D, [2 2 7], 0, 'both');
-    I3D = imdilate(I3D, ones(3,3,3));
-    I3D((xx3 - ddaeX - 2).^2 + (yy3 - ddaeY - 2).^2 + (zz3 - ddaeZ - 7).^2 < swcs{2}(1,6)^2) = 1;
-    sf2 = isosurface(I3D, .5);
-    % relocate soma to (0,0,1)
-    hmodel2.Vertices = bsxfun(@minus, sf2.vertices, [newsomaX, newsomaY, 0]) * opt.pixelsize;
-    hmodel2.Faces = sf2.faces;
-
-    % update theta
-%     somadist(t) = ds(t - track_time)*opt.pixelsize;
-    theta(t) = theta_cycle(t - track_time);
-    
-    somadist(t) = interp1(opt.tval, opt.tmean, theta(t));
-%     keyboard;
-    
-    set(hradian_tlt, 'String', sprintf('Angle = %6.2f \\circ', theta(t)*180/pi));
-    [xx, yy] = pol2cart(theta(t), 1);
-    set(hradian, 'XData', xx);
-    set(hradian, 'YData', yy);
-    set(htheta, 'YData', somadist);
-    set(hdiv1, 'XData', [t-1 t-1]*opt.tpf);
-    
-    % update bend
-    bend(t,:) = cellfun(@(x)sum(abs(x)),configs(t,:));
-    set(hmodel_tlt, 'String', sprintf('Bend: ddaE = %4.2f rad, ddaD = %4.2f rad', bend(t,:)));
-    set(hbend1, 'YData', bend(:,2));
-    set(hbend2, 'YData', bend(:,1));
-    set(hdiv2, 'XData', [t-1 t-1]*opt.tpf);
-    
-    newtval_ct = find(opt.tval < theta(t), 1, 'last');
-    if isempty(newtval_ct), newtval_ct = 1; end
-    tval_ct = max(tval_ct, newtval_ct);
-    if t == size(V,3) || isempty(configs{t+1,1}), tval_ct = length(opt.tval); end
-    
-    [x, y] = pol2cart([opt.tval(1:tval_ct) opt.tval(tval_ct:-1:1)], ...
-            [opt.tmean(1:tval_ct) + opt.tsem(1:tval_ct) ...
-            opt.tmean(tval_ct:-1:1) - opt.tsem(tval_ct:-1:1)]);
-    set(htsem, 'XData', x);
-    set(htsem, 'YData', y);
-    [x, y] = pol2cart(opt.tval(1:tval_ct) ,opt.tmean(1:tval_ct));
-    set(htmean, 'XData', x);
-    set(htmean, 'YData', y);
-
-    % save to video
-    pause(0.1);
-%     if ~isempty(filename)
-        writeVideo(outputVideo, getframe(gcf));
-%     end
-end
-% if ~isempty(filename)
-    close(outputVideo);
-% end
 pause;
 delete(f);
 end

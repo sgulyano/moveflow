@@ -10,7 +10,7 @@
 #define clamp(a, b1, b2) min(max(a, b1), b2);
 
 
-void imfilter1D_double(double *I, int lengthI, double *H, int lengthH, double *J) {
+void imfilter1D_double(double *I, mwSize lengthI, double *H, int lengthH, double *J) {
     int x, i, index, offset;
     int b2, offset2;
     if(lengthI==1)  
@@ -48,7 +48,7 @@ void imfilter1D_double(double *I, int lengthI, double *H, int lengthH, double *J
     }
 }
 
-void imfilter2D_double(double *I, int * sizeI, double *H, int lengthH, double *J) {
+void imfilter2D_double(double *I, mwSize * sizeI, double *H, int lengthH, double *J) {
     int y, x, i, y2;
     double *Irow, *Crow;
     int index=0, line=0;
@@ -118,7 +118,7 @@ void imfilter2D_double(double *I, int * sizeI, double *H, int lengthH, double *J
     free(RCache);
 }
 
-void imfilter3D_double(double *I, int * sizeI, double *H, int lengthH, double *J) {
+void imfilter3D_double(double *I, mwSize * sizeI, double *H, int lengthH, double *J) {
     int z, j, i, z2;
     double *Islice, *Cslice;
     int index=0, line=0;
@@ -187,7 +187,7 @@ void imfilter3D_double(double *I, int * sizeI, double *H, int lengthH, double *J
     free(SCache);
 }
 
-void imfilter1D_float(float *I, int lengthI, float *H, int lengthH, float *J) {
+void imfilter1D_float(float *I, mwSize lengthI, float *H, int lengthH, float *J) {
     int x, i, index, offset;
     int b2, offset2;
     if(lengthI==1)  
@@ -225,7 +225,7 @@ void imfilter1D_float(float *I, int lengthI, float *H, int lengthH, float *J) {
     }
 }
 
-void imfilter2D_float(float *I, int * sizeI, float *H, int lengthH, float *J) {
+void imfilter2D_float(float *I, mwSize * sizeI, float *H, int lengthH, float *J) {
     int y, x, i, y2;
     float *Irow, *Crow;
     int index=0, line=0;
@@ -295,7 +295,7 @@ void imfilter2D_float(float *I, int * sizeI, float *H, int lengthH, float *J) {
     free(RCache);
 }
 
-void imfilter3D_float(float *I, int * sizeI, float *H, int lengthH, float *J) {
+void imfilter3D_float(float *I, mwSize * sizeI, float *H, int lengthH, float *J) {
     int z, j, i, z2;
     float *Islice, *Cslice;
     int index=0, line=0;
@@ -364,7 +364,7 @@ void imfilter3D_float(float *I, int * sizeI, float *H, int lengthH, float *J) {
     free(SCache);
 }
 
-void imfilter2Dcolor_double(double *I, int * sizeI, double *H, int lengthH, double *J) {
+void imfilter2Dcolor_double(double *I, mwSize * sizeI, double *H, int lengthH, double *J) {
 	int i, index;
 	for(i=0; i<sizeI[2]; i++)
 	{
@@ -373,7 +373,7 @@ void imfilter2Dcolor_double(double *I, int * sizeI, double *H, int lengthH, doub
 	}
 }
 
-void imfilter2Dcolor_float(float *I, int * sizeI, float *H, int lengthH, float *J) {
+void imfilter2Dcolor_float(float *I, mwSize * sizeI, float *H, int lengthH, float *J) {
 	int i, index;
 	for(i=0; i<sizeI[2]; i++)
 	{
@@ -382,7 +382,7 @@ void imfilter2Dcolor_float(float *I, int * sizeI, float *H, int lengthH, float *
 	}
 }
 
-void GaussianFiltering3D_float(float *I, float *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering3D_float(float *I, float *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x;
@@ -402,7 +402,7 @@ void GaussianFiltering3D_float(float *I, float *J, int *dimsI, double sigma, dou
 	free(H);
 }
 
-void GaussianFiltering2Dcolor_float(float *I, float *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering2Dcolor_float(float *I, float *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x;
@@ -422,7 +422,7 @@ void GaussianFiltering2Dcolor_float(float *I, float *J, int *dimsI, double sigma
 	free(H);
 }
 
-void GaussianFiltering2D_float(float *I, float *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering2D_float(float *I, float *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x;
@@ -442,7 +442,7 @@ void GaussianFiltering2D_float(float *I, float *J, int *dimsI, double sigma, dou
 	free(H);
 }
 
-void GaussianFiltering1D_float(float *I, float *J, int lengthI, double sigma, double kernel_size)
+void GaussianFiltering1D_float(float *I, float *J, mwSize lengthI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x;
@@ -462,7 +462,7 @@ void GaussianFiltering1D_float(float *I, float *J, int lengthI, double sigma, do
 	free(H);
 }
 
-void GaussianFiltering3D_double(double *I, double *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering3D_double(double *I, double *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x, *H, totalH=0;
@@ -481,7 +481,7 @@ void GaussianFiltering3D_double(double *I, double *J, int *dimsI, double sigma, 
 	free(H);
 }
 
-void GaussianFiltering2Dcolor_double(double *I, double *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering2Dcolor_double(double *I, double *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x, *H, totalH=0;
@@ -500,7 +500,7 @@ void GaussianFiltering2Dcolor_double(double *I, double *J, int *dimsI, double si
 	free(H);
 }
 
-void GaussianFiltering2D_double(double *I, double *J, int *dimsI, double sigma, double kernel_size)
+void GaussianFiltering2D_double(double *I, double *J, mwSize *dimsI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x, *H, totalH=0;
@@ -519,7 +519,7 @@ void GaussianFiltering2D_double(double *I, double *J, int *dimsI, double sigma, 
 	free(H);
 }
 
-void GaussianFiltering1D_double(double *I, double *J, int lengthI, double sigma, double kernel_size)
+void GaussianFiltering1D_double(double *I, double *J, mwSize lengthI, double sigma, double kernel_size)
 {
 	int kernel_length,i;
     double x, *H, totalH=0;
@@ -541,7 +541,7 @@ void GaussianFiltering1D_double(double *I, double *J, int lengthI, double sigma,
 void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] ) {
     float *I_float, *J_float;
     double *I_double, *J_double;
-    int ndimsI;
+    mwSize ndimsI;
     /* Kernel size */
     float *SIZ_float;
     double *SIZ_double, kernel_size;
@@ -549,7 +549,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] ) {
     float *SIGMA_float;
     double *SIGMA_double, sigma;
     const mwSize *dimsI_const;
-    int dimsI[3];
+    mwSize dimsI[3];
     
     /* Check number of inputs */
     if(nrhs<2) { mexErrMsgTxt("2 input variables are required, 3 optional."); }

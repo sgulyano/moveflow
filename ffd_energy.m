@@ -28,8 +28,11 @@ I_bsnorm = I_bsnorm / sqrt(sum(sum(I_bsnorm.^2)));
 Eimg = 1 - max(sum(sum(Iregnorm .* I_bsnorm)), 0);
 
 %% smooth energy
-dtheta = cellfun(@(x)abs(diff(x,[],2)), config, 'UniformOutput', false);
-dtheta = [fliplr(dtheta{1}) config{1}(1)+config{1}(2) dtheta{2}];
+% dtheta = cellfun(@(x)abs(diff(x,[],2)), config, 'UniformOutput', false);
+% dtheta = [fliplr(configdtheta{1}) config{1}(1)+config{1}(2) dtheta{2}];
+dt1 = abs(diff(config{1},[],2));
+dt2 = abs(diff(config{2},[],2));
+dtheta = [fliplr(dt1) config{1}(1)+config{1}(2) dt2];
 dtheta(dtheta > pi) = 2*pi - dtheta(dtheta > pi);
 
 % dtheta = config(1:end-1) - config(2:end);
@@ -49,7 +52,7 @@ Econ = sum((Tx(constrain(:,1)) - constrain(:,2)').^2);
 
 %% total energy
 E = 10*Eimg + Esmooth + 20*Eshape + Econ;
-Es = {10*Eimg, Esmooth, Eshape, Econ};
+Es = {10*Eimg, Esmooth, 20*Eshape, Econ};
 
 end
 

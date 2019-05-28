@@ -118,7 +118,7 @@ switch dataset
         soma_opt.edge_thr = 0.3;
         adj_soma = [29, 86];
     case 7
-        gfpfile = '~/Desktop/LipingsData/20170616L7_align/20170616L7_align_z%d_t%03d.tif';     % Ca images
+        gfpfile = 'C:\Users\sguly\Documents\MATLAB\DanData\20170616L7_align\20170616L7_align_z%d_t%03d.tif';     % Ca images
         rfpfile = '';
         switchTZ = true;                                % switch position of T and Z in filename
         normalized = true;                              % normalized image slice
@@ -140,12 +140,14 @@ end
 
 %% read img data
 disp('Reading GFP and RFP images');
-gfpinfo = imfinfo(sprintf(gfpfile,0,0));
+[di, ff, ext] = fileparts(gfpfile);
+gfpinfo = imfinfo(fullfile(di, [sprintf(ff,0,0) ext]));
 gfp = zeros(gfpinfo.Height, gfpinfo.Width, num_img+1, 'uint8');
 gfp1sl = zeros(gfpinfo.Height, gfpinfo.Width, num_img+1, 'uint8');
 if ~isempty(rfpfile)
-    rfpinfo = imfinfo(sprintf(rfpfile,0,0));
-    if gfpinfo.Height ~= rfpinfo.Height || gfpinfo.Width ~= rfpinfo.Width,
+    [rdi, rff, rext] = fileparts(gfpfile);
+    rfpinfo = imfinfo(fullfile(rdi, [sprintf(rff,0,0) rext]));
+    if gfpinfo.Height ~= rfpinfo.Height || gfpinfo.Width ~= rfpinfo.Width
         error('GFP and RFP size mismatch');
     end
     rfp = zeros(rfpinfo.Height, rfpinfo.Width, num_img+1, 'uint8');
@@ -154,9 +156,9 @@ for t = 0:num_img
     V = zeros(gfpinfo.Height, gfpinfo.Width, num_slice+1, 'uint8');
     for z = 0:num_slice
         if switchTZ
-            X = imread( sprintf(gfpfile,z,t) );
+            X = imread( fullfile(di, [sprintf(ff,z,t) ext]) );
         else
-            X = imread( sprintf(gfpfile,t,z) );
+            X = imread( fullfile(di, [sprintf(ff,t,z) ext]) );
         end
         if normalized
             X = single(X);
@@ -380,8 +382,12 @@ for num = 1:length(initswctime)
 %     videoname = sprintf([savefile '_model_both%d.mp4'], num);
 %     ffd_plot_both([], gfp, {swc_ddad, swc_ddae}, track_time, soma_pos(num,:), results(num).configs, results(num).spline, opt);
     
-    videoname = sprintf([savefile '_model_both_stat%d_defense.mp4'], num);
-    theta_ffd_plot_both(videoname, gfp, {swc_ddad, swc_ddae}, track_time, soma_pos(num,:), soma_adj{num}, results(num).configs, results(num).spline, opt);
+%     videoname = sprintf([savefile '_model_both_stat%d.mp4'], num);
+%     theta_ffd_plot_both([], gfp, {swc_ddad, swc_ddae}, track_time, soma_pos(num,:), soma_adj{num}, results(num).configs, results(num).spline, opt);
+    videoname = '20170616L7/accordion.mp4';
+    ffd_plot_exp(videoname, gfp, {swc_ddad, swc_ddae}, ...
+            track_time, {soma_pos{num,1}, soma_pos{num,2}}, ...
+            results(num));
 end
 
 

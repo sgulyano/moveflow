@@ -1,0 +1,67 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="1599904017" file="C:\Users\y_sar\Documents\moveflow\Track Gcamp.prj" location="C:\Users\y_sar\Documents\moveflow" name="Track Gcamp" target="target.mlapps" target-name="Package App">
+    <param.appname>Track Gcamp</param.appname>
+    <param.authnamewatermark>Sarun Gulyanon</param.authnamewatermark>
+    <param.email>sgulyano@iu.edu</param.email>
+    <param.company>IUPUI</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary>Semi-Automatic Neuron Tracking for Gcamp Images</param.summary>
+    <param.description>Tracking Neuron in Gcamp Images by estimating soma as circles and dendrites by bounding boxes. Hough transform is used for detecting circles while non-linear FFD mapping is used for moving the bounding boxes. Then, users will edit the detection results. And the app will compute the intensity.</param.description>
+    <param.screenshot />
+    <param.version>1.2</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>C:\Users\y_sar\Documents\moveflow</param.output>
+    <param.guid>80833173-534f-48c6-8cb2-b945852168e3</param.guid>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.screenshot />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\trackGcamp_GUI.m</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\dendrite_manual_multi.m</file>
+      <file>${PROJECT_ROOT}\imgflow2vdo.m</file>
+      <file>${PROJECT_ROOT}\soma_manual_multi.m</file>
+      <file>${PROJECT_ROOT}\soma_match_multi.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\fix_slice</file>
+      <file>${PROJECT_ROOT}\toolbox</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\y_sar\Documents" name="moveflow" optional="false">C:\Users\y_sar\Documents\moveflow</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2017b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

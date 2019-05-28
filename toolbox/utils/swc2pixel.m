@@ -1,6 +1,9 @@
-function img = swc2pixel( swc, Isize )
+function img = swc2pixel( swc, Isize, type )
 %SWC2PIXEL draw the trace in swc format in pixel
+if nargin < 3, type = '3D'; end
+if strcmp(type, '2D'), swc(:,5) = 1; end
 if length(Isize)==2, Isize = [Isize inf]; end
+
 swc(:,3:5) = round(swc(:,3:5));
 X = cell(1,size(swc,1));
 n = size(swc,1);

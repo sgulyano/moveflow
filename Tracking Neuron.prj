@@ -1,0 +1,85 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="2211352801" file="C:\Users\y_sar\Documents\moveflow\Tracking Neuron.prj" location="C:\Users\y_sar\Documents\moveflow" name="Tracking Neuron" target="target.mlapps" target-name="Package App">
+    <param.appname>Tracking Neuron</param.appname>
+    <param.authnamewatermark>Sarun Gulyanon</param.authnamewatermark>
+    <param.email>sgulyano@iupui.edu</param.email>
+    <param.company>IUPUI</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary>Tracking ddaD and ddaE neurons over image stack sequence by fitting a foldable plane.</param.summary>
+    <param.description>Tracking neuron over the maximum intensity projection of image stack sequence by fitting a foldable plane to a pair of neurons, ddaD and ddaE. We assume no dendrite deformation in Y-axis. Input are the image stack sequence and the initial traces of neurons.</param.description>
+    <param.screenshot />
+    <param.version>1.7</param.version>
+    <param.products.name>
+      <item>MATLAB</item>
+      <item>Bioinformatics Toolbox</item>
+    </param.products.name>
+    <param.products.id>
+      <item>1</item>
+      <item>83</item>
+    </param.products.id>
+    <param.products.version>
+      <item>9.3</item>
+      <item>4.9</item>
+    </param.products.version>
+    <param.platforms />
+    <param.output>C:\Users\y_sar\Documents\moveflow</param.output>
+    <param.guid>4a18ba36-0d3b-4623-a5ae-096d318d3527</param.guid>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.screenshot />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\main.m</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>C:\Users\Yo\Documents\MATLAB\imshow3D.m</file>
+      <file>${PROJECT_ROOT}\convert2excel.m</file>
+      <file>${PROJECT_ROOT}\ffd_energy.m</file>
+      <file>${PROJECT_ROOT}\ffd_gui_both.m</file>
+      <file>${PROJECT_ROOT}\ffd_init_from_config.m</file>
+      <file>${PROJECT_ROOT}\ffd_interpolate.m</file>
+      <file>${PROJECT_ROOT}\ffd_plot_both.m</file>
+      <file>${PROJECT_ROOT}\imgflow2vdo.m</file>
+      <file>${PROJECT_ROOT}\plot_track.m</file>
+      <file>${PROJECT_ROOT}\soma_manual.m</file>
+      <file>${PROJECT_ROOT}\soma_match.m</file>
+      <file>${PROJECT_ROOT}\tuneParam.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\config.mat</file>
+      <file>${PROJECT_ROOT}\ddadbackward_back.mat</file>
+      <file>${PROJECT_ROOT}\ddaeforward_back.mat</file>
+      <file>${PROJECT_ROOT}\fix_slice</file>
+      <file>${PROJECT_ROOT}\thetain.mat</file>
+      <file>${PROJECT_ROOT}\toolbox\utils</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\y_sar\Documents" name="moveflow" optional="false">C:\Users\y_sar\Documents\moveflow</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2017b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

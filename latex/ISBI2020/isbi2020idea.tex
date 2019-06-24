@@ -1,0 +1,200 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\author{Sarun Gulyanon}
+\title{Graph-Based Neuron Tracking in Calcium Images}
+\begin{document}
+\maketitle
+
+%\begin{itemize}
+%	\item The problem of inexact graph matching or error-tolerant/correcting GM.
+%	\item Finding the many-to-many mapping function from graph 1 to graph 2.
+%	\item These graphs may only have attributed nodes since edges are unreliable.
+%	\item See the problem as computing graph edit distance (GED).
+%\end{itemize}
+
+
+In this neuron tracking problem, we are given the calcium image stack sequence, $\mathcal{I} = \{ \mathcal{I}^{(t)} \}$, where $t = 0,1,\dots,T$. To make the problem feasible, we require the initial morphology of the neuron, $\mathcal{G} = \{ V_\mathcal{G}, E_\mathcal{G} \}$.
+
+\section{Definition}
+A graph is denoted by $G = \{V, E\}$, where $V$ is the set of nodes (also called \emph{vertices}) and $E \subset V \times V$ (also defined as $E \subset [V]^2$) is the set of edges (also known as lines) of graph $G$. 
+
+If nodes in a graph have attributes, the graph is an attributed graph denoted by $G = \{V, E, \alpha \}$, where $\alpha : V \rightarrow L$ is the node labeling function. $L$ is restricted to labels consisting of fixed-size tuples, that is, $L = \mathbb{R}^N$, where $n \in \mathbb{N}$.
+
+\section{Inexact Graph Matching}
+The problem of inexact graph matching (GM) or error-tolerant/correcting GM is finding the mapping of nodes between two graphs that optimizes a certain affinity or distortion criterion, where nodes do not need to have a correspondence in another graph.
+
+\section{Graph Edit Distance}
+A commonly used measures of affinity criterion is the graph edit distance (GED). A graph can be transformed to another one by a finite sequence of graph edit operations. Each operation has a cost, which is defined differently in various algorithms. GED, $\delta (G_i, G_j)$, is defined by the least-cost graph edit operation sequence, $P$, that are needed to transform one graph, $G_i = \{V_i, E_i, \alpha\}$, into another, $G_j = \{V_j, E_j, \alpha\}$.
+
+\begin{equation}
+\delta(G_i, G_j) = \min_P \sum_{(u \rightarrow v) \in P} c(u \rightarrow v)
+\end{equation}
+where $c(u \rightarrow v)$ is the cost of the graph edit operation that maps node $u$ to node $v$. $u$ and $v$ are a correspondence of each other.
+
+\section{Method}
+In this work, we tackle the neuron tracking problem over calcium images as the inexact graph matching (GM) problem \cite{gao2010} computed by minimizing the GED.
+
+Given the calcium image sequence, first convert every frame into the ``frame'' graph whose nodes are superpixels. Second, compute the ``template'' graph, which is the subgraph of the ``frame'' graph corresponded to the neuron trace, using the inexact graph matching. Finally, align each dendrite to the image cues, and repeat throughout the image sequence.
+
+
+\subsection{Creating ``Frame'' Graph}
+Due to the imaging system limitation, the maximum intensity projection of calcium image stack, $I_t = f(\mathcal{I}^{(t)})$, is used instead of the raw input volume. 
+
+To convert a frame into a graph, first compute the superpixel segmentation over $I_t$ using techniques like Linear Spectral Clustering Superpixel \cite{li2015, chen2017}\footnote{https://jschenthu.weebly.com/projects.html,\\ https://www.mathworks.com/matlabcentral/fileexchange/65684-linear-spectral-clustering-superpixel}. The result is the set of superpixels $V_t$. 
+
+Let the ``frame'' graph be $G_t = \{ V_t, E_t, \alpha \}$, where the existence of edges between superpixels $E_t$ are computed using Delaunay Triangulation over the centroid of superpixels in $V_t$. The labeling function $\alpha$ is defined in the next subsection.
+
+
+\subsection{Initial ``Template'' Graph}
+The trace is described at the structural level, while the input image stacks are in appearance level. We propose the ``template'' graph that bridges between two levels of representations.
+
+The ``template'' graph at time $t=0$ is denoted by $G'_0 =  \{V'_0, E'_0, \alpha \}$. $V'_0$ is the set of patches overlapping with the initial morphology $\mathcal{G}$, 
+\begin{equation}
+V'_0 = \{\,v \mid v \text{ overlap with } \mathcal{G}, v \in V_0 \,\}
+\end{equation}
+
+$E'_0$ is the set of edges between adjacent superpixels in $V'_0$, 
+\begin{equation}
+E'_0 = \{\, (u, v) \mid (u, v) \in E_0 ;\; u, v \in V'_0 \,\}
+\end{equation}
+
+
+\subsection{Tree Search Algorithm}
+A tree (state space) search algorithm is used to find the GED because it is simple, allows the many-to-many mapping function, and makes no assumptions about the problem. Tracking is done by computing the GED between the previous ``template'' graph and the current ``frame'' graph, $\delta (G'_{t-1}, G_t)$. The state space consists of a number of possible mappings and the corresponding cost. The root of the state space represents the graph edit operation sequence with no correspondences. The first layer of states represents mappings with one correspondence, and so on. The algorithm terminates when every node in $G'_{t-1}$ has at least one correspondence.
+
+A state is produced by adding a new correspondence to the parent state. Let $\psi$ be a function that determine, for a given state/mapping $p$, a set of possible new correspondences that can be added to form new child states. 
+
+\begin{equation}
+\psi(p) = \{ \check{V}_{p,t-1} \times \check{V}_{p,t} \} \cup \{ \check{V}_{p,t-1} \times V_{p,t} \} \cup \{ V_{p,t-1} \times \check{V}_{p,t} \}
+\end{equation}
+where $\check{V}_{p,t}$ is the set of nodes that are not currently mapped and are adjacent to the set of mapped nodes $V_{p,t}$.
+
+
+\subsection{Labeling Function}
+We incorporate tissue deformation, local image feature, neuronal morphology, and local characteristics of neurons.
+
+Individual edge descriptor is not meaningful here since nodes are not guaranteed to have the exact correspondence and the same region of neuron may comprise a different number of nodes. Hence, we use the aggregate edge descriptor embedded in the node descriptor instead.
+
+\textbf{Average intensity} of any node $v_i \in V_t$ is defined by,
+\begin{equation}
+I_t(v_i) = \frac{1}{|S(v_i)|}\sum_{x \in S(v_i)} I_t(x)
+\end{equation} 
+where $S(v_i)$ is the set of pixels in the superpixel $v_i$
+
+\textbf{Average eigenvector} from Frangi filter \cite{frangi1998},
+\begin{equation}
+F(v_i) = \frac{1}{|S(v_i)|}\sum_{x \in S(v_i)} \hat{\textbf{u}}_{x,1}
+\end{equation}
+where Let $\lambda_{s,x,k}$ denote the eigenvalue corresponding to the $k$-th normalized eigenvector $\hat{\textbf{u}}_{s,x,k}$
+of the Hessian matrix of the image $\mathcal{H}_{x,k}$ all computed at scale $s$ on pixel $x$. 
+\begin{equation}
+\lambda_{x,k} = \max_{s_{min} \le s \le s_{max}} \lambda_{s,x,k}
+\end{equation}
+will be the eigenvalue with the $k$-th smallest magnitude ($\lambda_{x,1} < \lambda_{x,2}$) and $\hat{\textbf{u}}_{x,k}$ are their corresponding eigenvectors.
+
+To quantify the \textbf{relation to neighbors}, first compute the orientation $O_{ij}$ and magnitude $M_{ij}$ for each neighbor superpixel $v_j$ of $v_i$, $(v_i, v_j) \in E_t$,
+\begin{equation}
+\begin{aligned}
+O_{ij} & = C(v_j) - C(v_i) \\
+M_{ij} & = 1 - \| I_t(v_j) - I_t(v_i) \|
+\end{aligned}
+\end{equation}
+where $C$ is the centroid of the superpixel. This approximate the geodesic distance between two superpixels since superpixel contains pixels with similar properties, e.g., intensity.
+
+Then, a histogram is created to encode the relation to neighbor superpixels, similar to the orientation histogram in SIFT \cite{lowe1999}. In this histogram, the 360 degrees of orientation are broken into 8 bins (each 45 degrees). The amount added to the bin depends on the magnitude projected in the bin's direction.
+
+To achieve rotation independence, make the orientation relative to the keypoint's orientation by subtracting the keypoint's rotation from each orientation. The keypoint is the bin with the highest magnitude.
+
+To achieve illumination dependence, threshold the magnitudes that are too big.
+
+Similarly, \textbf{relation to mapping} is a histogram of mapped neighbors' orientation weighted by the inverse of distance $D_{ij}$, where $v_j \in V_{p,t}$.
+\begin{equation}
+D_{ij} = \frac{1}{ \| O_{ij} \| }
+\end{equation}
+
+\textbf{Smooth deformation} keeps the change in deformation low over space. For $u_i \in \check{V}_{p,t-1}$ and $v_i \in \check{V}_{p,t}$, the deformation of the correspondence $i$ is defined as,
+\begin{equation}
+t_i = C(u_i) - C(v_i)
+\end{equation}
+
+For $(u_i, u_j) \in E'_{t-1}$ and $(v_i, v_j) \in E_t$, where $u_i$ and $v_i$ are correspondence we are considering; $u_j \in V_{p,t-1}$ and $v_j \in  V_{p,t}$ are the adjacent correspondences we found earlier. Then, the change in deformation at correspondence $i$ is:
+\begin{equation}
+T_i = \sum_{t_j} \| t_j - t_i \|
+\end{equation}
+
+Hence, the labeling function $\alpha(v_i)$ is defined as the tuple of 19 numbers: average intensity $I_t(v_i)$, the orientation of the average eigenvector $F(v_i)$ in radian, smooth deformation $T_i$, and the values in both histograms' bins.
+
+The cost of substituting node $(u,v) \in \{ \check{V}_{p,t-1} \times \check{V}_{p,t} \}$ is defined based on cosine similarity as follows:
+\begin{equation}
+c(u \rightarrow v) = 1 - \frac{\sum_{i=1}^N \alpha_i(u)\alpha_i(v)}{\sqrt{\sum_{i=1}^N \alpha_i^2(u)}\sqrt{\sum_{i=1}^N \alpha_i^2(v)}}
+\end{equation}
+
+\subsection{Labeling Function for Group of Nodes}
+The node grouping is needed for finding many-to-many relationship between frames in an efficient way. Node grouping similar to \cite{morrison2015}.
+
+The cost of substituting node $(u,v) \in \{ \check{V}_{p,t-1} \times V_{p,t} \}$ is defined based on cosine similarity as before but the labeling function of $u$ must take into account other correspondences of $v$.
+
+Let $\hat{u}$ is the set of nodes correspondence to $v$, $\hat{u} = \{\, w \mid (w \rightarrow v) \in p \,\} \cup \{u\}$. Then, the labeling function $\alpha(\hat{u})$ is also defined for a group of nodes. \textbf{Average intensity} and \textbf{average eigenvector} of a group of nodes are defined as,
+\begin{equation}
+\begin{aligned}
+I_t(\hat{u}) & = \frac{1}{|S(\hat{u})|}\sum_{x \in S(\hat{u})} I_t(x) \\
+F(\hat{u}) & = \frac{1}{|S(\hat{u})|}\sum_{x \in S(\hat{u})} \hat{\textbf{u}}_{x,1}
+\end{aligned}
+\end{equation} 
+
+The \textbf{relation to neighbors} and \textbf{relation to mapping} are quantified from the neighbors of the group of nodes, ignoring the internal edges. Using the centroid of the group of nodes and edges between a groupd of nodes and other.
+
+The cost of substituting node $(u,v) \in \{ V_{p,t-1} \times \check{V}_{p,t} \}$ follows the same suit.
+
+
+\subsection{Coarse Tracking}
+Let $P$ be the graph edit operation sequence with the optimal GED; and $P(V_t)$ denote the set of nodes $V_t$ mapped by the sequence $P$. Then, the ``template'' graph at time $t$ is $G'_t =  \{V'_t, E'_t, \alpha \}$,
+\begin{equation}
+V'_t = P(V_t)
+\end{equation}
+
+$E'_t$ is the set of edges between adjacent superpixels in $V'_t$, 
+\begin{equation}
+E'_t = \{\, (u, v) \mid (u, v) \in E_t ;\; u, v \in V'_t \,\}
+\end{equation}
+
+\section{Optimization}
+In this work, the computation of GED is based on A*-beamsearch \cite{neuhaus2006} with node grouping.
+
+\subsection{A* Search}
+The A* or the best-first search algorithm finds an optimal path from a state space based on a heuristic function, which estimates the expected costs of the best route from the root through the current state to a leaf state. At each step during tree state space traversal, the most promising state --- the one with the lowest heuristic cost --- from the set of child states is chosen. Hence, at any state $p$, A* algorithm selects the path that minimizes the following cost:
+\begin{equation} \label{eq:a*}
+f(p) = g(p) + h(p)
+\end{equation}
+where $g(p)$ is the cost of the optimal path from the root to the current state $p$ and $h(p)$ is the estimated cost from state $p$ to a leaf state. \cite{hart1968}
+
+Here, $h(n)$ is defined by the average cost of $g(p)$ times the number of remaining unmapped nodes.
+
+\subsection{Beam Search}
+In A* search, we may end up expanding all successor nodes in the search tree. In beam search, only a fixed number, $b$ called \emph{beam width}, of states in each layer are processed. We keep only the $b$ partial edit paths with the lowest costs from eq.~\ref{eq:a*}. 
+
+This means only those states with the most promising partial mappings are explored. Since a graph edit operation sequence between similar graphs has lower cost than the one between dissimilar graphs \cite{neuhaus2006}.
+
+
+\section{Fine Tracking: Aligning Dendrites}
+Consider a set of nodes, $V_d \subset V_\mathcal{G}$, that constitutes a dendrite/branch $d$ in the neuron morphology. The corresponding nodes in the ``template'' graph at time $t = 0$ is
+\begin{equation}
+V'_{d,0} = \{\,v \mid v \text{ overlap with } V_d, v \in V_0 \,\}
+\end{equation}
+
+While, the corresponding nodes in the ``template'' graph at time $t$ is
+\begin{equation}
+V'_{d,t} = P( V_{d,t-1})
+\end{equation}
+
+The alignment between dendrite at consecutive time step is done by registering patches from $V'_{d,t}$ and $V_{d,t-1}$ using techniques like free-form deformation (FFD).
+%or the Gaussian processes (GPs) model \cite{yu2007}
+
+\bibliographystyle{ieeetr}
+\small{\bibliography{all}}
+
+\end{document}
